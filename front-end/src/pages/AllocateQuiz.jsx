@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const AllocateQuiz = () => {
+const AllocateQuizes = ({ refreshSummary }) => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [questionCount, setQuestionCount] = useState(10); // default 10
+  const [questionCount, setQuestionCount] = useState(10);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -23,33 +23,19 @@ const AllocateQuiz = () => {
   }, []);
 
   const handleAllocate = (student) => {
-    setSelectedStudent(student); // <-- FIXED (was console.log(setSelectedStudent(...)))
+    setSelectedStudent(student);
     setShowPopup(true);
   };
 
   const submitAllocation = async () => {
-    if (!selectedStudent) return alert("Select a student first");
+    if (!selectedStudent) return alert("Select student first");
     try {
       const res = await axios.post("http://localhost:5000/api/allocate", {
         studentId: selectedStudent._id,
         questionCount: Number(questionCount),
       });
 
-      // update local students state: increment count and push allocation
-      const allocation = res.data.allocation; // populated allocation expected
-      setStudents(prev =>
-        prev.map(s => {
-          if (s._id === selectedStudent._id) {
-            return {
-              ...s,
-              assignedQuizzesCount: (s.assignedQuizzesCount || 0) + 1,
-              assignedQuizzes: [ ...(s.assignedQuizzes || []), allocation ],
-            };
-          }
-          return s;
-        })
-      );
-
+      if (refreshSummary) refreshSummary();
       alert(`Quiz allocated successfully to ${selectedStudent.fname} ${selectedStudent.lname}`);
       setShowPopup(false);
       setSelectedStudent(null);
@@ -61,7 +47,6 @@ const AllocateQuiz = () => {
   };
 
   if (loading) return <p className="text-white p-4">Loading students...</p>;
-
   return (
     <div className="p-4 text-white relative">
       <h2 className="text-2xl font-bold mb-4">Assign Quizzes</h2>
@@ -92,14 +77,13 @@ const AllocateQuiz = () => {
           ))}
         </tbody>
       </table>
-
-      {/* Popup */}
       {showPopup && selectedStudent && (
         <div className="fixed inset-0 bg-[#00000066] flex items-center justify-center z-50">
           <div className="bg-white text-black border-2 p-6 rounded-lg w-96">
             <h1 className="text-2xl text-center font-bold mb-3">Assign Quiz to</h1>
             <h3 className="text-lg">Name: {selectedStudent.fname} {selectedStudent.lname}</h3>
             <h3 className="text-lg mb-4">Rollno: {selectedStudent.rollno}</h3>
+            <input type="text" />
 
             <div className="flex flex-col gap-3">
               <label>Select No of Questions</label>
@@ -136,4 +120,4 @@ const AllocateQuiz = () => {
   );
 };
 
-export default AllocateQuiz;
+export default AllocateQuizes;

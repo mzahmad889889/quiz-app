@@ -41,7 +41,7 @@ const AddedQuizQuestions = () => {
           q._id === editingQuestion ? { ...q, ...editData } : q
         )
       );
-      setEditingQuestion(null); // Close popup
+      setEditingQuestion(null);
     } catch (err) {
       console.error("Error updating question:", err);
     }
@@ -64,7 +64,7 @@ const AddedQuizQuestions = () => {
       <h2 className="text-2xl font-bold mb-4">Added Questions</h2>
       <div>
         <table className="min-w-full rounded-lg">
-          <thead className="bg-[#003d39] text-white">
+          <thead className="border-b bg-[#003d39] text-white">
             <tr>
               <th>S.No</th>
               <th className="py-2 px-4 text-left">Question</th>
@@ -95,13 +95,13 @@ const AddedQuizQuestions = () => {
                   <div className="flex justify-center items-center gap-3">
                     <button
                     onClick={() => openEditPopup(q)}
-                    className="bg-blue-500 cursor-pointer hover:bg-blue-600 px-2 py-1 rounded text-white"
+                    className="bg-blue-500 cursor-pointer hover:bg-blue-600 px-2 py-1 rounded text-white transition duration-200 ease-in"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => deleteQuestion(q._id)}
-                    className="bg-red-500 cursor-pointer hover:bg-red-600 px-2 py-1 rounded text-white"
+                    className="bg-red-500 cursor-pointer hover:bg-red-600 px-2 py-1 rounded text-white transition duration-200 ease-in"
                   >
                     Delete
                   </button>

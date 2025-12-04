@@ -4,6 +4,13 @@ import { AiOutlineDashboard } from "react-icons/ai";
 import { PiStudent } from "react-icons/pi";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { MdOutlineMenu } from "react-icons/md";
+import { MdOutlineAssignment } from "react-icons/md";
+import { CiBoxList } from "react-icons/ci";
+import { GoHistory } from "react-icons/go";
+import { MdAssignmentAdd } from "react-icons/md";
+import { MdPendingActions } from "react-icons/md";
+
+
 import axios from "axios";
 
 // Import your components
@@ -18,9 +25,9 @@ const AdminDashboard = () => {
     { name: "Dashboard", icon: <AiOutlineDashboard /> },
     { name: "Students", icon: <PiStudent /> },
     { name: "Questions", icon: <FaRegQuestionCircle /> },
-    { name: "Assign Quizes", icon: <FaRegQuestionCircle /> },
-    { name: "Quiz Questions", icon: <FaRegQuestionCircle /> },
-    { name: "Student Quiz History", icon: <FaRegQuestionCircle /> },
+    { name: "Assign Quizes", icon: <MdOutlineAssignment /> },
+    { name: "Quiz Questions", icon: <CiBoxList /> },
+    { name: "Student Quiz History", icon: <GoHistory /> },
   ];
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,11 +59,14 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
+  // Fetch summary
   const fetchSummary = async () => {
     setLoadingSummary(true);
     setSummaryError("");
     try {
-      const res = await axios.get("http://localhost:5000/api/admin-dashboard-summary");
+      const res = await axios.get(
+        "http://localhost:5000/api/admin-dashboard-summary"
+      );
       setSummary({
         totalStudents: res.data.totalStudents ?? 0,
         totalAssignedQuizzes: res.data.totalAssignedQuizzes ?? 0,
@@ -71,42 +81,37 @@ const AdminDashboard = () => {
     }
   };
 
+  // Refresh summary after allocation or any action
+  const refreshSummary = () => {
+    fetchSummary();
+  };
+
   useEffect(() => {
     fetchSummary();
-    // optionally refresh every X seconds:
-    // const iv = setInterval(fetchSummary, 15_000);
-    // return () => clearInterval(iv);
   }, []);
 
   const renderSectionData = () => {
-    if (activeSection === "Students") {
-      return <StudentDetails />;
-    } else if (activeSection === "Questions") {
-      return <Questions setAddedQuestions={setAddedQuestions} />;
-    } else if (activeSection === "Quiz Questions") {
-      return <AddedQuizQuestions addedQuestions={addedQuestions} />;
-    } else if (activeSection === "Assign Quizes") {
-      return <AllocateQuizes />;
-    } else if (activeSection === "Student Quiz History") {
-      return <StudentQuizHistory />;
-    } else {
-      return <div className="p-4 text-white">Welcome to Admin Dashboard</div>;
-    }
+    if (activeSection === "Students") return <StudentDetails />;
+    if (activeSection === "Questions") return <Questions setAddedQuestions={setAddedQuestions} />;
+    if (activeSection === "Quiz Questions") return <AddedQuizQuestions addedQuestions={addedQuestions} />;
+    if (activeSection === "Assign Quizes") return <AllocateQuizes refreshSummary={refreshSummary} />;
+    if (activeSection === "Student Quiz History") return <StudentQuizHistory />;
+    return <div className="p-4 text-white">Welcome to Admin Dashboard</div>;
   };
 
   return (
     <main className="w-screen font-system-ui min-h-screen bg-[#003d39]">
-      {/* Navbar */}
-        <MdOutlineMenu
-          className="lg:hidden cursor-pointer"
-          onClick={() => setSidebarOpen(true)}
-        />
+      <MdOutlineMenu
+        className="lg:hidden cursor-pointer"
+        onClick={() => setSidebarOpen(true)}
+      />
 
       <section className="w-screen text-white flex gap-5 py-5">
         {/* Sidebar */}
         <section
-          className={`w-[20%] lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-[140%]"
-            } flex items-center flex-col gap-4 bg-[#055e58] pt-5 rounded-3xl shadow-lg ml-4`}
+          className={`w-[20%] lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[140%]"
+          } flex items-center flex-col gap-4 bg-[#055e58] pt-5 rounded-3xl shadow-lg ml-4`}
         >
           <button className="text-xl cursor-pointer" onClick={() => setSidebarOpen(false)}>
             X
@@ -142,7 +147,7 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <section className="w-[90%] h-150">
-          {/* Dashboard Cards — HIDE when activeSection = "Quiz Questions" */}
+          {/* Dashboard Cards — hide for "Quiz Questions" */}
           {activeSection !== "Quiz Questions" && (
             <section className="flex w-[95%] bg-[#055e58] rounded-3xl h-45 items-center justify-evenly flex-wrap px-10 mb-8 ml-7">
               {/* Total Students */}
@@ -157,18 +162,18 @@ const AdminDashboard = () => {
 
               {/* Active Quizzes (Assigned) */}
               <div className="w-70 bg-[#003d39] rounded-3xl shadow-lg p-6 text-3xl">
-                <h1>Active Quizes</h1>
+                <h1>Total Quizzes</h1>
                 <div className="flex items-center justify-between mt-8">
-                  <FaRegQuestionCircle className="text-3xl" />
+                  <MdAssignmentAdd className="text-3xl" />
                   <span>{loadingSummary ? "..." : summary.totalAssignedQuizzes}</span>
                 </div>
               </div>
 
               {/* Pending Results */}
               <div className="w-70 bg-[#003d39] rounded-3xl shadow-lg p-6 text-3xl">
-                <h1>Pending Results</h1>
+                <h1>Pending Quizzes</h1>
                 <div className="flex items-center justify-between mt-8">
-                  <FaRegQuestionCircle className="text-3xl" />
+                  <MdPendingActions className="text-3xl" />
                   <span>{loadingSummary ? "..." : summary.totalPendingQuizzes}</span>
                 </div>
               </div>

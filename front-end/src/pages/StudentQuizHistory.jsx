@@ -39,7 +39,6 @@ const StudentQuizHistory = () => {
               <th className="p-3">Date</th>
             </tr>
           </thead>
-
           <tbody>
             {history.length === 0 ? (
               <tr>
@@ -51,25 +50,17 @@ const StudentQuizHistory = () => {
               history.map((item) => (
                 <tr key={item._id} className="border-b">
                   <td className="p-3">
-                    {item.studentId ? `${item.studentId.fname} ${item.studentId.lname}` : "Unknown Student"}
+                    {/* {item.studentId ? `${item.studentId.fname} ${item.studentId.lname}` : "Unknown Student"} */}
+                    {item.student?.name || "Unknown Student"}
                   </td>
                   <td className="p-3">
-                    {item.studentId?.email}
+                    {/* {item.studentId?.email} */}
+                    {item.student?.email || "—"}
                   </td>
-
-                  {/* 
-                  <td className="p-3">{item.quizId?.title || "Unknown Quiz"}</td> */}
-
                   <td className="p-3 font-semibold">
                     {item.score}/{item.totalQuestions}
                   </td>
-
-                  {/* <td className="p-3">
-                    {new Date(item.createdAt).toLocaleString()}
-                    
-                  </td> */}
                   <td className="p-3">{new Date(item.submittedAt).toLocaleString()}</td>
-
                 </tr>
               ))
             )}
