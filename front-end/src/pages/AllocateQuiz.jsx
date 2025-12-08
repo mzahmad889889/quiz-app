@@ -50,7 +50,7 @@ const AllocateQuizes = ({ refreshSummary }) => {
   return (
     <div className="p-4 text-white relative">
       <h2 className="text-2xl font-bold mb-4">Assign Quizzes</h2>
-      <table className="w-[95%] m-auto border-1 h-60 border-white text-center">
+      <table className="w-[95%] m-auto border-1 h-40 border-white text-center">
         <thead className="bg-[#003d39] text-white">
           <tr>
             <th>S.No</th>

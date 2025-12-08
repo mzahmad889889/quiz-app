@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { UserContext } from "./UserContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { login } = useContext(UserContext);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,23 +24,30 @@ const LoginForm = () => {
     e.preventDefault();
 
     if (!formData.role) {
-      alert("Please select Teacher or Student");
+      alert("Please select Admin or Student");
       return;
     }
 
     try {
       const res = await axios.post("http://localhost:5000/login", formData);
+      const userFromBackend = res.data.user;
 
-      alert("Login Successful!");
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-
-      // Redirect based on selected role
-      if (formData.role === "teacher") {
+      if (formData.role === "admin") {
+        if (userFromBackend.role !== "admin") {
+          alert("This user is not an admin!");
+          return;
+        }
+        localStorage.setItem("adminUser", JSON.stringify(userFromBackend));
         navigate("/admin");
       } else {
+        if (userFromBackend.role !== "student") {
+          alert("This user is not a student!");
+          return;
+        }
+        // ✅ Save student to context + localStorage
+        login(userFromBackend);
         navigate("/student");
       }
-
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
@@ -50,7 +59,7 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit}>
           <h2 className="text-3xl text-center mb-6 text-gray-900">Sign In</h2>
 
-          {/* Email Input */}
+          {/* Email */}
           <div className="mb-4">
             <label className="block font-bold text-gray-700 mb-1">Email*</label>
             <input
@@ -63,11 +72,9 @@ const LoginForm = () => {
             />
           </div>
 
-          {/* Password Input */}
+          {/* Password */}
           <div className="mb-6">
-            <label className="block font-bold text-gray-700 mb-1">
-              Password*
-            </label>
+            <label className="block font-bold text-gray-700 mb-1">Password*</label>
             <input
               type="password"
               name="password"
@@ -76,32 +83,33 @@ const LoginForm = () => {
               className="w-full border-b border-gray-400 focus:border-black outline-none py-2 text-gray-800"
               onChange={handleChange}
             />
-
-            <div className="mt-4 flex gap-4">
-              <p><strong>Sign-in As: </strong></p>
-              <label>
-                <input className="mr-1"
-                  type="radio"
-                  name="role"
-                  value="teacher"
-                  onChange={handleChange}
-                />
-                Teacher
-              </label>
-
-              <label>
-                <input className="mr-1"
-                  type="radio"
-                  name="role"
-                  value="student"
-                  onChange={handleChange}
-                />
-                Student
-              </label>
-            </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Role Selection */}
+          <div className="mb-6 flex gap-4 items-center">
+            <p><strong>Sign-in As: </strong></p>
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="admin"
+                onChange={handleChange}
+                className="mr-1"
+              />
+              Admin
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="student"
+                onChange={handleChange}
+                className="mr-1"
+              />
+              Student
+            </label>
+          </div>
+
           <div className="w-full flex justify-center mt-10 mb-5">
             <button
               type="submit"
@@ -111,7 +119,6 @@ const LoginForm = () => {
             </button>
           </div>
 
-          {/* Sign-Up Link */}
           <div className="text-center">
             <span>Don't have an account? - </span>
             <button

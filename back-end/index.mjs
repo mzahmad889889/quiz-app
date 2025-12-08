@@ -1,3 +1,4 @@
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -15,17 +16,18 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("DB Error:", err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.log("❌ DB Error:", err));
 
 // MODELS
-// USERS (Students)
+// USERS (Students & Admin)
 const userSchema = new mongoose.Schema({
   fname: String,
   lname: String,
   email: { type: String, unique: true },
   password: String,
   rollno: Number,
+  role: { type: String, default: "student" } // "student" or "admin"
 });
 const User = mongoose.model("User", userSchema);
 
@@ -62,17 +64,20 @@ const quizResultSchema = new mongoose.Schema({
 });
 const QuizResult = mongoose.model("QuizResult", quizResultSchema);
 
-// ROUTES
-// Admin dashboard summary route
+// ------------------ ROUTES ------------------
+
+// ADMIN dashboard summary route (exclude admins from student counts)
 app.get("/api/admin-dashboard-summary", async (req, res) => {
   try {
-    const totalStudents = await User.countDocuments();
+    const totalStudents = await User.countDocuments({ role: "student" });
+    const totalAdmins = await User.countDocuments({ role: "admin" });
     const totalAssignedQuizzes = await AllocatedQuiz.countDocuments();
     const totalSubmittedQuizzes = await QuizResult.countDocuments();
     const totalPendingQuizzes = Math.max(totalAssignedQuizzes - totalSubmittedQuizzes, 0);
 
     res.json({
       totalStudents,
+      totalAdmins,
       totalAssignedQuizzes,
       totalSubmittedQuizzes,
       totalPendingQuizzes,
@@ -138,12 +143,26 @@ app.post("/api/register", async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const last = await User.findOne().sort({ rollno: -1 });
+    const last = await User.findOne({ role: "student" }).sort({ rollno: -1 });
     const newRoll = last ? last.rollno + 1 : 1001;
 
-    const user = new User({ fname, lname, email, password, rollno: newRoll });
+    const user = new User({
+      fname,
+      lname,
+      email,
+      password,
+      rollno: newRoll,
+      role: "student"
+    });
+
     await user.save();
-    res.json({ message: "Student Registered", rollno: newRoll, userId: user._id });
+
+    res.json({
+      message: "Student Registered",
+      rollno: newRoll,
+      userId: user._id
+    });
+
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ message: "Error", error: err });
@@ -152,10 +171,10 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: "Email and password required" });
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) return res.status(400).json({ message: "Email and password required" });
 
-    const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email, password, role });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     res.json({
@@ -166,6 +185,7 @@ app.post("/login", async (req, res) => {
         lname: user.lname,
         rollno: user.rollno,
         email: user.email,
+        role: user.role
       },
     });
   } catch (err) {
@@ -188,7 +208,10 @@ app.post("/api/allocate", async (req, res) => {
     const ids = questions.map(q => q._id);
 
     const alloc = await new AllocatedQuiz({ studentId, questions: ids }).save();
-    const populated = await AllocatedQuiz.findById(alloc._id).populate("questions");
+    // populate both studentId and questions to return a friendly allocation object
+    const populated = await AllocatedQuiz.findById(alloc._id)
+      .populate("studentId", "fname lname email rollno")
+      .populate("questions", "question options correctAnswer");
 
     res.json({ message: "Quiz allocated", allocation: populated });
   } catch (err) {
@@ -290,7 +313,7 @@ app.post("/api/submit-quiz", async (req, res) => {
   }
 });
 
-// ADMIN: Get all quiz results
+// ADMIN: Get all quiz results (shaped)
 app.get("/api/student-quiz-history", async (req, res) => {
   try {
     const historyRaw = await QuizResult.find().sort({ submittedAt: -1 }).populate("studentId").populate({
@@ -369,14 +392,15 @@ app.get("/api/quiz-history/:studentId", async (req, res) => {
   }
 });
 
-// STUDENTS LIST 
+// STUDENTS LIST (only students, exclude admins)
 app.get("/api/students", async (req, res) => {
   try {
-    const students = await User.find({}, "fname lname rollno email");
+    // fetch only users with role: "student"
+    const students = await User.find({ role: "student" }, "fname lname rollno email");
 
     const result = await Promise.all(
       students.map(async (s) => {
-        const assigned = await AllocatedQuiz.find({ studentId: s._id });
+        const assigned = await AllocatedQuiz.find({ studentId: s._id }).populate("questions");
         const submitted = await QuizResult.find({ studentId: s._id });
 
         return {
@@ -403,4 +427,4 @@ app.get("/api/students", async (req, res) => {
 
 // START SERVER
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

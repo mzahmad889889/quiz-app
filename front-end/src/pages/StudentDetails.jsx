@@ -29,7 +29,7 @@ const StudentDetails = () => {
       <h2 className="text-2xl font-bold mb-4">Students</h2>
 
       <table className="w-[95%] m-auto border-1 border-white text-center">
-        <thead className="bg-[#003d39] border-1 h-12 text-white">
+        <thead className="bg-[#003d39] border-1 h-10 text-white">
           <tr>
             <th>S.No</th>
             <th>Name</th>
@@ -40,7 +40,7 @@ const StudentDetails = () => {
           </tr>
         </thead>
 
-        <tbody className="h-40">
+        <tbody className="h-30">
           {studentData.map((s, idx) => (
             <tr key={s._id}>
               <td>{idx + 1}</td>
