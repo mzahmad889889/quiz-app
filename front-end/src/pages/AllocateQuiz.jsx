@@ -50,7 +50,7 @@ const AllocateQuizes = ({ refreshSummary }) => {
   return (
     <div className="p-4 text-white relative">
       <h2 className="text-2xl font-bold mb-4">Assign Quizzes</h2>
-      <table className="w-[95%] m-auto border-1 h-40 border-white text-center">
+      <table className="w-[95%] m-auto shadow-xl/30 h-50  text-center">
         <thead className="bg-[#003d39] text-white">
           <tr>
             <th>S.No</th>
@@ -59,7 +59,7 @@ const AllocateQuizes = ({ refreshSummary }) => {
             <th>Assign Quizes</th>
           </tr>
         </thead>
-        <tbody className="border-1">
+        <tbody className="">
           {students.map((student, idx) => (
             <tr key={student._id}>
               <td>{idx + 1}</td>

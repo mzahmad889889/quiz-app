@@ -32,6 +32,16 @@ const LoginForm = () => {
       const res = await axios.post("http://localhost:5000/login", formData);
       const userFromBackend = res.data.user;
 
+      // ---------------------------
+      // Clean old data
+      // ---------------------------
+      localStorage.removeItem("studentUser");
+      localStorage.removeItem("adminUser");
+      sessionStorage.removeItem("studentUser");
+
+      // ---------------------------
+      // ADMIN LOGIN
+      // ---------------------------
       if (formData.role === "admin") {
         if (userFromBackend.role !== "admin") {
           alert("This user is not an admin!");
@@ -39,13 +49,21 @@ const LoginForm = () => {
         }
         localStorage.setItem("adminUser", JSON.stringify(userFromBackend));
         navigate("/admin");
-      } else {
+        return;
+      }
+
+      // ---------------------------
+      // STUDENT LOGIN
+      // ---------------------------
+      if (formData.role === "student") {
         if (userFromBackend.role !== "student") {
           alert("This user is not a student!");
           return;
         }
-        // ✅ Save student to context + localStorage
+
+        // ✅ Save student to context + sessionStorage + localStorage
         login(userFromBackend);
+
         navigate("/student");
       }
     } catch (err) {
@@ -59,7 +77,6 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit}>
           <h2 className="text-3xl text-center mb-6 text-gray-900">Sign In</h2>
 
-          {/* Email */}
           <div className="mb-4">
             <label className="block font-bold text-gray-700 mb-1">Email*</label>
             <input
@@ -72,7 +89,6 @@ const LoginForm = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-6">
             <label className="block font-bold text-gray-700 mb-1">Password*</label>
             <input
@@ -85,28 +101,13 @@ const LoginForm = () => {
             />
           </div>
 
-          {/* Role Selection */}
           <div className="mb-6 flex gap-4 items-center">
             <p><strong>Sign-in As: </strong></p>
             <label>
-              <input
-                type="radio"
-                name="role"
-                value="admin"
-                onChange={handleChange}
-                className="mr-1"
-              />
-              Admin
+              <input type="radio" name="role" value="admin" onChange={handleChange} className="mr-1" /> Admin
             </label>
             <label>
-              <input
-                type="radio"
-                name="role"
-                value="student"
-                onChange={handleChange}
-                className="mr-1"
-              />
-              Student
+              <input type="radio" name="role" value="student" onChange={handleChange} className="mr-1" /> Student
             </label>
           </div>
 

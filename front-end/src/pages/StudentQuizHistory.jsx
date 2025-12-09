@@ -29,11 +29,10 @@ const StudentQuizHistory = () => {
       <h2 className="text-2xl font-bold text-white mb-4">Students Quiz History</h2>
 
       <div className="overflow-x-auto">
-        <table className="border-1 w-[95%] m-auto text-center rounded-lg overflow-hidden">
-          <thead className=" border-1 text-white bg-[#003d39]">
+        <table className="shadow-xl/30 w-[95%] m-auto text-center overflow-hidden">
+          <thead className="text-white bg-[#003d39]">
             <tr>
               <th className="p-3">Student Name</th>
-              {/* <th className="p-3">Quiz Title</th> */}
               <th className="p-3">Email</th>
               <th className="p-3">Score</th>
               <th className="p-3">Date</th>
@@ -48,7 +47,7 @@ const StudentQuizHistory = () => {
               </tr>
             ) : (
               history.map((item) => (
-                <tr key={item._id} className="border-b">
+                <tr key={item._id}>
                   <td className="p-3">
                     {/* {item.studentId ? `${item.studentId.fname} ${item.studentId.lname}` : "Unknown Student"} */}
                     {item.student?.name || "Unknown Student"}

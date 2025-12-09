@@ -85,8 +85,8 @@ const Quiz = ({ questions, quizId }) => {
     <div className="flex bg-[#055e58] rounded-xl p-6">
 
       {/* Left - Questions */}
-      <div className="flex w-[15%] flex-col gap-2 p-2 border-1">
-        <h2 className="text-white font-bold text-lg">
+      <div className="flex w-[15%] flex-col gap-2 p-2 shadow-xl/30">
+        <h2 className="text-white text-center font-bold text-lg">
           Total Questions {currentQIndex + 1}/{questions.length}
         </h2>
 
@@ -104,7 +104,7 @@ const Quiz = ({ questions, quizId }) => {
       </div>
 
       {/* Center - Question */}
-      <div className="w-3/4 mx-4 border-1 p-4">
+      <div className="w-3/4 mx-4 p-4 shadow-xl/30">
         <h2 className="text-xl font-bold mb-4 text-white">
           {currentQIndex + 1}. {questions[currentQIndex].question}
         </h2>
@@ -164,14 +164,14 @@ const Quiz = ({ questions, quizId }) => {
                     : "bg-[#003d39] hover:bg-green-400 hover:text-black"
                 }`}
             >
-              Submit Quiz
+              Submit
             </button>
           </div>
         </div>
       </div>
 
       {/* Right - Skipped + Timer */}
-      <div className="w-[18%] pl-4 flex flex-col text-center border">
+      <div className="w-[18%] pl-4 pt-4 flex flex-col text-center shadow-xl/30">
         <div className="w-[80%] mx-auto mb-4 p-2 bg-[#003d39] rounded-lg text-center text-white">
           <p className="text-sm mb-1">Timer Remaining</p>
           <p className="text-2xl font-bold">

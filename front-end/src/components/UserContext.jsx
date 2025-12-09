@@ -1,24 +1,33 @@
 import React, { createContext, useState, useEffect } from "react";
 
 export const UserContext = createContext();
-
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // load user from localStorage when app loads
+  // Load user from sessionStorage / localStorage on app load
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("studentUser") || "null");
-    if (storedUser) setUser(storedUser);
+    if (storedUser) {
+      setUser(storedUser);
+    } else {
+      const sessionUser = JSON.parse(sessionStorage.getItem("studentUser") || "null");
+      if (sessionUser) setUser(sessionUser);
+    }
   }, []);
 
   const login = (student) => {
-    localStorage.setItem("studentUser", JSON.stringify(student));
+    // Save to context
     setUser(student);
+
+    // Save to sessionStorage & localStorage
+    sessionStorage.setItem("studentUser", JSON.stringify(student));
+    localStorage.setItem("studentUser", JSON.stringify(student));
   };
 
   const logout = () => {
-    localStorage.removeItem("studentUser");
     setUser(null);
+    sessionStorage.removeItem("studentUser");
+    localStorage.removeItem("studentUser");
   };
 
   return (

@@ -105,8 +105,8 @@ const StudentDashboard = () => {
           {assignedQuizzes.length === 0 ? (
             <p>No quizzes assigned yet.</p>
           ) : (
-            <table className="w-full text-white rounded-lg border-1 text-center">
-              <thead className="bg-[#003d39] text-white border-1">
+            <table className="w-[95%] m-auto text-white shadow-xl/30 text-center">
+              <thead className="bg-[#003d39] text-white">
                 <tr>
                   <th className="p-3">Quiz Title</th>
                   <th className="p-3">Assigned Date</th>
@@ -116,7 +116,7 @@ const StudentDashboard = () => {
 
               <tbody>
                 {assignedQuizzes.map((quiz) => (
-                  <tr key={quiz._id} className="border-b">
+                  <tr key={quiz._id}>
                     <td className="p-3">{quiz.quizId?.title}</td>
                     <td className="p-3">{new Date(quiz.assignedAt).toLocaleString()}</td>
                     <td className="p-3">
