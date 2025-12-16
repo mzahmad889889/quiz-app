@@ -1,8 +1,10 @@
-
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import multer from "multer";
+import csv from "csv-parser";
+import fs from "fs";
 
 dotenv.config();
 
@@ -19,7 +21,8 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.log("❌ DB Error:", err));
 
-// MODELS
+// -------------------- MODELS --------------------
+
 // USERS (Students & Admin)
 const userSchema = new mongoose.Schema({
   fname: String,
@@ -64,7 +67,48 @@ const quizResultSchema = new mongoose.Schema({
 });
 const QuizResult = mongoose.model("QuizResult", quizResultSchema);
 
+// ------------------ FILE UPLOAD CONFIG ------------------
+const upload = multer({ dest: "uploads/" });
+
 // ------------------ ROUTES ------------------
+
+app.post("/api/upload-questions", upload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "CSV required" });
+
+  const results = [];
+  fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on("data", (data) => results.push(data))
+    .on("end", async () => {
+      try {
+        // Map CSV rows to Question objects
+        const questionsToInsert = results
+          .map(row => {
+            const { question, option1, option2, option3, option4, correctAnswer } = row;
+            if (!question || !option1 || !option2 || !option3 || !option4) return null;
+            return {
+              question,
+              options: [option1, option2, option3, option4],
+              correctAnswer: Number(correctAnswer) || 0
+            };
+          })
+          .filter(Boolean); // Remove null rows
+
+        // Bulk insert all questions at once
+        const insertedQuestions = await Question.insertMany(questionsToInsert);
+
+        // Delete temp file
+        fs.unlinkSync(req.file.path);
+
+        res.json({ message: "Questions uploaded", questions: insertedQuestions });
+      } catch (err) {
+        console.error("CSV upload error:", err);
+        res.status(500).json({ message: "Error uploading CSV", error: err.message });
+      }
+    });
+});
+
+// ------------------ EXISTING ROUTES ------------------
 
 // ADMIN dashboard summary route (exclude admins from student counts)
 app.get("/api/admin-dashboard-summary", async (req, res) => {
@@ -168,6 +212,8 @@ app.post("/api/register", async (req, res) => {
     res.status(500).json({ message: "Error", error: err });
   }
 });
+
+// ... REST OF YOUR EXISTING ROUTES ...
 
 app.post("/login", async (req, res) => {
   try {
@@ -330,7 +376,7 @@ app.get("/api/student-quiz-history", async (req, res) => {
         student: {
           _id: student._id,
           name: `${student.fname || ""} ${student.lname || ""}`.trim() || "Unknown Student",
-          email: student.email || "",
+          email: student.email || "", rollno: student.rollno || ""
         },
         quiz: {
           _id: allocation._id,

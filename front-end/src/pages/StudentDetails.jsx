@@ -33,6 +33,7 @@ const StudentDetails = () => {
           <tr>
             <th>S.No</th>
             <th>Name</th>
+            <th>Email</th>
             <th>Roll No</th>
             <th>Assigned Quiz</th>
             <th>Submitted Quiz</th>
@@ -45,6 +46,10 @@ const StudentDetails = () => {
             <tr key={s._id}>
               <td>{idx + 1}</td>
               <td>{s.fname} {s.lname}</td>
+              <td className="p-3">
+                    {/* {item.studentId?.email} */}
+                    {s.email || "—"}
+                  </td>
               <td>{s.rollno}</td>
 
               {/* Coming from Backend */}

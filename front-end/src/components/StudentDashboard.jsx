@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { PiStudent } from "react-icons/pi";
 import { MdOutlineMenu } from "react-icons/md";
 import { MdOutlineAssignment } from "react-icons/md";
 import { GoHistory } from "react-icons/go";
 
-import Profile from "../pages/Profile";
-import QuizHistory from "../pages/QuizHistory";
-import Quiz from "../pages/Quiz";
-
 import axios from "axios";
+
+import Quiz from "../pages/Quiz";
+import QuizHistory from "../pages/QuizHistory";
 
 const StudentDashboard = () => {
   const navItems = [
-    { name: "Dashboard", icon: <AiOutlineDashboard /> },
-    { name: "Profile", icon: <PiStudent /> },
-    { name: "History", icon: <GoHistory /> },
-    { name: "Assign Quizes", icon: <MdOutlineAssignment /> },
+    { name: "Dashboard", path: "dashboard", icon: <AiOutlineDashboard /> },
+    { name: "Profile", path: "profile", icon: <PiStudent /> },
+    { name: "History", path: "history", icon: <GoHistory /> },
+    { name: "Assign Quizzes", path: "quizzes", icon: <MdOutlineAssignment /> },
   ];
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("Dashboard");
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [quizStarted, setQuizStarted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [quizId, setQuizId] = useState(null);
@@ -29,19 +28,25 @@ const StudentDashboard = () => {
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // ✅ Get student user from localStorage safely
+  // Get student from localStorage
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("studentUser"));
+    const storedUser = JSON.parse(sessionStorage.getItem("studentUser"));
     if (!storedUser) {
       navigate("/login");
     } else {
       setUser(storedUser);
+
+      // set activeSection from URL
+      const pathParts = location.pathname.split("/");
+      const section = pathParts[2] || "dashboard";
+      setActiveSection(section);
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem("studentUser");
+    sessionStorage.removeItem("studentUser");
     navigate("/login");
   };
 
@@ -62,7 +67,6 @@ const StudentDashboard = () => {
     fetchAssigned();
   }, [user]);
 
-  // Start Quiz
   const startQuiz = async (quiz) => {
     if (!user) return;
     try {
@@ -95,13 +99,23 @@ const StudentDashboard = () => {
       return <Quiz questions={questions} quizId={quizId} studentId={user.id} />;
     }
 
-    if (activeSection === "Profile") return <Profile />;
-    if (activeSection === "History") return <QuizHistory studentId={user.id} />;
-    if (activeSection === "Assign Quizes") {
+    if (activeSection === "profile")
+      return (
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Profile</h1>
+          <p>Name: {user.fname} {user.lname}</p>
+          <p>Email: {user.email}</p>
+        </div>
+      );
+
+      if (activeSection === "history")
+        return <QuizHistory studentId={user.id} />;
+
+
+    if (activeSection === "quizzes") {
       return (
         <div className="p-6 text-white">
           <h1 className="text-2xl font-bold mb-4">Assigned Quizzes</h1>
-
           {assignedQuizzes.length === 0 ? (
             <p>No quizzes assigned yet.</p>
           ) : (
@@ -113,7 +127,6 @@ const StudentDashboard = () => {
                   <th className="p-3">Action</th>
                 </tr>
               </thead>
-
               <tbody>
                 {assignedQuizzes.map((quiz) => (
                   <tr key={quiz._id}>
@@ -142,6 +155,7 @@ const StudentDashboard = () => {
       );
     }
 
+    // Default dashboard
     return (
       <div className="p-6">
         <h1 className="text-3xl text-white mb-5">Welcome {user.fname} 👋</h1>
@@ -168,9 +182,8 @@ const StudentDashboard = () => {
       <section className="w-screen text-white py-5 h-screen flex">
         {/* Sidebar */}
         <section
-          className={`w-[18%] h-170 rounded-3xl lg:translate-x-0 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-[140%]"
-          } flex flex-col gap-4 bg-[#055e58] pt-6 shadow-lg ml-4`}
+          className={`w-[18%] h-170 rounded-3xl lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-[140%]"
+            } flex flex-col gap-4 bg-[#055e58] pt-6 shadow-lg ml-4`}
         >
           <button
             className="text-xl cursor-pointer ml-3"
@@ -185,15 +198,21 @@ const StudentDashboard = () => {
               className="w-1/3 pb-2"
               alt="student pic"
             />
-            <p className="font-bold text-lg capitalize">{user.fname} {user.lname}</p>
+            <p className="font-bold text-lg capitalize">
+              {user.fname} {user.lname}
+            </p>
           </section>
 
           <section>
             {navItems.map((item) => (
               <div
                 key={item.name}
-                className="flex items-center gap-2 p-3 w-[80%] ml-3 mb-3 cursor-pointer hover:bg-[#003d39] rounded-xl"
-                onClick={() => setActiveSection(item.name)}
+                className={`flex items-center gap-2 p-3 w-[80%] ml-3 mb-3 cursor-pointer rounded-xl hover:bg-[#003d39] ${activeSection === item.path ? "bg-[#003d39]" : ""
+                  }`}
+                onClick={() => {
+                  setActiveSection(item.path);
+                  navigate(`/student/${item.path}`);
+                }}
               >
                 <div className="text-xl">{item.icon}</div>
                 <div className="text-xl">{item.name}</div>

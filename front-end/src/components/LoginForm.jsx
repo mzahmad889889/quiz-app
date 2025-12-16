@@ -35,8 +35,8 @@ const LoginForm = () => {
       // ---------------------------
       // Clean old data
       // ---------------------------
-      localStorage.removeItem("studentUser");
-      localStorage.removeItem("adminUser");
+      // localStorage.removeItem("studentUser");
+      sessionStorage.removeItem("adminUser");
       sessionStorage.removeItem("studentUser");
 
       // ---------------------------
@@ -47,7 +47,7 @@ const LoginForm = () => {
           alert("This user is not an admin!");
           return;
         }
-        localStorage.setItem("adminUser", JSON.stringify(userFromBackend));
+        sessionStorage.setItem("adminUser", JSON.stringify(userFromBackend));
         navigate("/admin");
         return;
       }
