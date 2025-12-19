@@ -83,24 +83,25 @@ const Quiz = ({ questions, quizId }) => {
 
   return (
     <div className="flex bg-[#055e58] rounded-xl p-6">
-
-      {/* Left - Questions */}
-      <div className="flex w-[15%] flex-col gap-2 p-2 shadow-xl/30">
-        <h2 className="text-white text-center font-bold text-lg">
+      <div className="w-[15%] p-2 shadow-xl/30">
+        <h2 className="text-white text-center font-bold text-lg mb-2">
           Total Questions {currentQIndex + 1}/{questions.length}
         </h2>
 
-        {questions.map((q, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentQIndex(idx)}
-            className={`text-left px-2 py-1 border ${
-              idx === currentQIndex ? "text-green-400 font-bold text-xl" : "bg-[#055e58] text-white"
-            }`}
-          >
-            Question {idx + 1}
-          </button>
-        ))}
+        <div className="grid grid-cols-4 gap-2">
+          {questions.map((q, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentQIndex(idx)}
+              className={`py-2 text-center border rounded ${idx === currentQIndex
+                  ? "bg-green-600 text-white font-bold"
+                  : "bg-[#055e58] text-white"
+                }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Center - Question */}
@@ -114,9 +115,8 @@ const Quiz = ({ questions, quizId }) => {
             <button
               key={idx}
               onClick={() => handleOptionSelect(idx)}
-              className={`text-left px-4 py-2 border rounded-lg w-full ${
-                selectedOption === idx ? "bg-green-500" : "bg-[#055e58] text-white"
-              }`}
+              className={`text-left px-4 py-2 border rounded-lg w-full ${selectedOption === idx ? "bg-green-500" : "bg-[#055e58] text-white"
+                }`}
             >
               {String.fromCharCode(65 + idx)}. {opt}
             </button>
@@ -158,10 +158,9 @@ const Quiz = ({ questions, quizId }) => {
               onClick={handleSubmitQuiz}
               disabled={currentQIndex !== questions.length - 1}
               className={`px-4 h-10 cursor-pointer text-white text-lg rounded-xl transition duration-200 ease-in
-                ${
-                  currentQIndex !== questions.length - 1
-                    ? "bg-[#003d39] cursor-not-allowed"
-                    : "bg-[#003d39] hover:bg-green-400 hover:text-black"
+                ${currentQIndex !== questions.length - 1
+                  ? "bg-[#003d39] cursor-not-allowed"
+                  : "bg-[#003d39] hover:bg-green-400 hover:text-black"
                 }`}
             >
               Submit
@@ -180,17 +179,17 @@ const Quiz = ({ questions, quizId }) => {
         </div>
 
         <h4 className="text-white text-xl mb-5">Skipped Questions</h4>
-        <div className="w-[80%] flex mx-auto flex-col gap-3">
+        <div className="w-[90%] mb-5 flex flex-wrap mx-auto gap-2">
           {skippedQuestions.length === 0 ? (
             <p className="text-white">No skipped questions</p>
           ) : (
             skippedQuestions.map((idx) => (
               <button
-                className="border-1 rounded p-1"
+                className="border-1 rounded p-1 min-w-[44px]"
                 key={idx}
                 onClick={() => setCurrentQIndex(idx)}
               >
-                Question {idx + 1}
+                {idx + 1}
               </button>
             ))
           )}
@@ -201,3 +200,4 @@ const Quiz = ({ questions, quizId }) => {
 };
 
 export default Quiz;
+

@@ -42,24 +42,28 @@ const Questions = ({ addedQuestions, setAddedQuestions }) => {
     setCorrectIndex(null);
   };
 
-  // CSV Upload function
   const uploadCsv = async () => {
-    if (!csvFile) return alert("Please select a CSV file");
-    const formData = new FormData();
-    formData.append("file", csvFile);
+  if (!csvFile) return alert("Please select a CSV file");
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/upload-questions", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setAddedQuestions(prev => [...prev, ...res.data.questions]);
-      setCsvFile(null);
-      alert("Questions uploaded successfully");
-    } catch (err) {
-      console.error("CSV upload error:", err);
-      alert("Error uploading CSV");
-    }
-  };
+  const formData = new FormData();
+  formData.append("file", csvFile);
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/upload-questions",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    alert(res.data.message || "Questions uploaded successfully");
+
+    setCsvFile(null);
+
+  } catch (err) {
+    console.error("CSV upload error:", err.response?.data || err.message);
+    alert(err.response?.data?.message || "Error uploading CSV");
+  }
+};
 
   return (
     <div className="p-4 text-white">
@@ -67,10 +71,10 @@ const Questions = ({ addedQuestions, setAddedQuestions }) => {
 
       {/* CSV Upload Section */}
       <div className="mb-4 flex gap-2 items-center">
-        <input type="file" accept=".csv" onChange={(e) => setCsvFile(e.target.files[0])} />
+        <input type="file" accept=".csv" className="bg-[#003d39] rounded cursor-pointer text-white py-1.5 px-3" onChange={(e) => setCsvFile(e.target.files[0])} />
         <button
           onClick={uploadCsv}
-          className="bg-purple-500 px-4 py-2 rounded hover:bg-purple-600 transition"
+          className="bg-[#003d39] font-bold hover:bg-[#74EE66] hover:text-black transition duration-200 ease-in cursor-pointer text-white py-1.5 rounded px-3"
         >
           Upload CSV
         </button>
